@@ -2,3 +2,4 @@
 *.save
 *.rar
 *:Zone.Identifier
+backup/before-restore-*/

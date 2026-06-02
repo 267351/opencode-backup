@@ -1,0 +1,137 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/master/src/oh-my-openagent.schema.json",
+  "opencodeVersion": ">=1.0.150",
+
+  "agents": {
+    "enabled": true,
+
+    // ✅ 修复：强制交互模式 + 必须提问
+    "interactive": true,
+    "auto_answer": false,
+
+    "hephaestus": {
+      "model": "volcengine-plan/doubao-seed-2.0-code",
+      "temperature": 0.3, // ✅ 提高温度，恢复多选
+      "options": { "thinking": { "type": "enabled" } }
+    },
+
+    "prometheus": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.3,
+      "options": { "thinking": { "type": "enabled", "budget": 8000 } }
+    },
+
+    "oracle": {
+      "model": "volcengine-plan/doubao-seed-2.0-code",
+      "temperature": 0.3,
+      "options": { "thinking": { "type": "enabled", "budget": 6000 } }
+    },
+
+    "metis": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "enabled", "budget": 4000 } }
+    },
+
+    "momus": {
+      "model": "volcengine-plan/deepseek-v3.2",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "atlas": {
+      "model": "volcengine-plan/doubao-seed-code",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } }
+    },
+
+    "librarian": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "explore": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "multimodal-looker": {
+      "model": "volcengine-plan/kimi-k2.5",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "sisyphus": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } },
+      "permission": { "question": "ask" }
+    }
+  },
+
+  // ✅ 修复：权限配置 - 所有问题必须用户手动选择
+  "permission": {
+    "question": "ask",
+    "edit": "ask",
+    "bash": "ask"
+  },
+
+  "categories": {
+    "visual-engineering": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.5,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "ultrabrain": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+    "deep": {
+      "model": "volcengine-plan/deepseek-v3.2",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+    "artistry": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.7,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "quick": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "unspecified-low": {
+      "model": "volcengine-plan/kimi-k2.6",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "unspecified-high": {
+      "model": "volcengine-plan/doubao-seed-2.0-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } }
+    },
+    "writing": {
+      "model": "volcengine-plan/kimi-k2.6",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    }
+  },
+
+  "models": {
+    "default": "volcengine-plan/glm-5.1",
+    "planner": "volcengine-plan/glm-5.1",
+    "builder": "volcengine-plan/glm-5.1",
+    "reviewer": "volcengine-plan/deepseek-v3.2"
+  },
+
+  "claude": { "enabled": false },
+  "openai": { "enabled": false },
+  "gemini": { "enabled": false },
+  "copilot": { "enabled": false },
+  "volcengine-coding": { "enabled": false },
+  "hooks": { "enabled": false }
+}

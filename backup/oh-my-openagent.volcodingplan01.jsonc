@@ -1,0 +1,158 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/master/src/oh-my-openagent.schema.json",
+  "opencodeVersion": ">=1.0.150",
+
+  // 核心：启用专用智能代理
+  "agents": {
+    "enabled": true,
+
+    // 主调度器：用 Doubao-Seed-2.0-Code（字节自研代码模型，质量高）
+    "hephaestus": {
+      "model": "volcengine-plan/doubao-seed-2.0-code",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 战略规划师：用 GLM-5.1（国产最强推理，负责需求分析/架构设计）
+    "prometheus": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled", "budget": 8000 } }
+    },
+
+    // 架构咨询师：用 Doubao-Seed-2.0-Code（技术决策/方案细化）
+    "oracle": {
+      "model": "volcengine-plan/doubao-seed-2.0-code",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "enabled", "budget": 6000 } }
+    },
+
+    // 漏洞分析器：用 GLM-5.1（发现计划遗漏/问题）
+    "metis": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.05,
+      "options": { "thinking": { "type": "enabled", "budget": 4000 } }
+    },
+
+    // 严格审查员：用 DeepSeek-V3.2（代码质量/计划合理性检查）
+    "momus": {
+      "model": "volcengine-plan/deepseek-v3.2",
+      "temperature": 0.0,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 任务编排器：用 Doubao-Seed-Code（大型项目任务拆分，经济高效）
+    "atlas": {
+      "model": "volcengine-plan/doubao-seed-code",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 文档和代码库搜索：用 Doubao-Seed-2.0-Lite（快速准确，成本低）
+    "librarian": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 快速代码库检索：用 Doubao-Seed-2.0-Lite（速度快，稳定可靠）
+    "explore": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.0,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 多模态观察者：用 Kimi-K2.5（图片/PDF/图表分析，支持多模态）
+    "multimodal-looker": {
+      "model": "volcengine-plan/kimi-k2.5",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 重复性任务自动化：用 Doubao-Seed-2.0-Lite（稳定高效，成本低）
+    "sisyphus-junior": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.0,
+      "options": { "thinking": { "type": "disabled" } }
+    }
+  },
+
+  // 分类模型：按任务类型匹配最优模型
+  "categories": {
+    // 前端/UI/可视化：用 GLM-4.7（前端能力出色，200k上下文）
+    "visual-engineering": {
+      "model": "volcengine-plan/glm-4.7",
+      "temperature": 0.5,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 复杂推理/算法/数学：用 GLM-5.1（逻辑推理最强）
+    "ultrabrain": {
+      "model": "volcengine-plan/glm-5.1",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+
+    // 深度思考/系统架构：用 DeepSeek-V3.2（底层实现能力强）
+    "deep": {
+      "model": "volcengine-plan/deepseek-v3.2",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+
+    // 创意写作/文案：用 GLM-4.7（中文表达能力好）
+    "artistry": {
+      "model": "volcengine-plan/glm-4.7",
+      "temperature": 0.7,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 快速响应/简单问题：用 Doubao-Seed-2.0-Lite（速度快，成本低）
+    "quick": {
+      "model": "volcengine-plan/doubao-seed-2.0-lite",
+      "temperature": 0.0,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 低优先级任务：用 Kimi-K2.5（稳定且成本低，256k上下文）
+    "unspecified-low": {
+      "model": "volcengine-plan/kimi-k2.5",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 高优先级任务：用 Doubao-Seed-2.0-Pro（代码质量最高）
+    "unspecified-high": {
+      "model": "volcengine-plan/doubao-seed-2.0-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    // 文档撰写/报告：用 Kimi-K2.5（长文本生成能力强，256k上下文）
+    "writing": {
+      "model": "volcengine-plan/kimi-k2.5",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    }
+  },
+
+  // 全局默认模型：兜底配置
+  "models": {
+    "default": "volcengine-plan/doubao-seed-2.0-code", // 通用默认
+    "planner": "volcengine-plan/doubao-seed-2.0-pro",  // 规划用高质量模型
+    "builder": "volcengine-plan/doubao-seed-2.0-code",  // 构建用代码模型
+    "reviewer": "volcengine-plan/deepseek-v3.2"         // 审查用严格模型
+  },
+
+  // 第三方模型开关：只启用火山引擎，禁用其他
+  "claude": { "enabled": false },
+  "openai": { "enabled": false },
+  "gemini": { "enabled": false },
+  "copilot": { "enabled": false },
+  "volcengine-coding": { "enabled": false }, // 注意：原配置是 volcengine-coding，这里我们用 volcengine-plan
+  // 注意：oh-my-openagent 可能需要通过 plugin 或自定义 provider 来支持 volcengine-plan，
+  // 这里假设你的 opencode.json 中的 provider 配置已正确映射。
+
+  // 钩子功能：默认禁用
+  "hooks": { "enabled": false }
+}

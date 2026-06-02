@@ -1,0 +1,137 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/master/src/oh-my-openagent.schema.json",
+  "opencodeVersion": ">=1.0.150",
+
+  "agents": {
+    "enabled": true,
+
+    // 强制交互模式 + 必须提问
+    "interactive": true,
+    "auto_answer": false,
+
+    "hephaestus": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.3,
+      "options": { "thinking": { "type": "enabled" } }
+    },
+
+    "prometheus": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.3,
+      "options": { "thinking": { "type": "enabled", "budget": 8000 } }
+    },
+
+    "oracle": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.3,
+      "options": { "thinking": { "type": "enabled", "budget": 6000 } }
+    },
+
+    "metis": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "enabled", "budget": 4000 } }
+    },
+
+    "momus": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "atlas": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } }
+    },
+
+    "librarian": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "explore": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "multimodal-looker": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+
+    "sisyphus": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } },
+      "permission": { "question": "ask" }
+    }
+  },
+
+  // 权限配置 - 所有问题必须用户手动选择
+  "permission": {
+    "question": "ask",
+    "edit": "ask",
+    "bash": "ask"
+  },
+
+  "categories": {
+    "visual-engineering": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.5,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "ultrabrain": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+    "deep": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled", "budget": 10000 } }
+    },
+    "artistry": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.7,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "quick": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "unspecified-low": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.1,
+      "options": { "thinking": { "type": "disabled" } }
+    },
+    "unspecified-high": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "enabled" } }
+    },
+    "writing": {
+      "model": "mimo/mimo-v2.5-pro",
+      "temperature": 0.2,
+      "options": { "thinking": { "type": "disabled" } }
+    }
+  },
+
+  "models": {
+    "default": "mimo/mimo-v2.5-pro",
+    "planner": "mimo/mimo-v2.5-pro",
+    "builder": "mimo/mimo-v2.5-pro",
+    "reviewer": "mimo/mimo-v2.5-pro"
+  },
+
+  "claude": { "enabled": false },
+  "openai": { "enabled": false },
+  "gemini": { "enabled": false },
+  "copilot": { "enabled": false },
+  "volcengine-coding": { "enabled": false },
+  "hooks": { "enabled": false }
+}

@@ -4,17 +4,19 @@
 
 set -e
 
-CURRENT_DIR="$(pwd)"
-EXPECTED_DIR="/home/hys/projects/opencode-backup"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ "$CURRENT_DIR" != "$EXPECTED_DIR" ]; then
+if [ ! -f "$REPO_ROOT/backup.sh" ]; then
     echo "❌ 错误：必须在 opencode-backup 项目目录下执行"
-    echo "请先运行: cd $EXPECTED_DIR"
+    echo "请先切换到项目根目录"
     exit 1
 fi
 
 OPENCODE_DIR="$HOME/.config/opencode"
-BACKUP_DIR="$CURRENT_DIR/backup"
+BACKUP_DIR="$REPO_ROOT/backup"
+
+REPO_SKILLS_DIR="$REPO_ROOT/skills"
 
 if [ ! -d "$BACKUP_DIR" ]; then
     echo "❌ 备份目录不存在: $BACKUP_DIR"
@@ -36,15 +38,26 @@ with open('$OPENCODE_DIR/opencode.json', 'r') as f:
 with open('$BACKUP_DIR/opencode.json', 'r') as f:
     backup = json.load(f)
 
-if 'provider' in backup and 'provider' in existing:
-    for name in backup['provider']:
-        if name in existing:
-            old_key = existing[name].get('options', {}).get('apiKey', '')
-            if old_key and old_key != 'YOUR_API_KEY_HERE':
-                backup[name]['options']['apiKey'] = old_key
+PLACEHOLDER = 'YOUR_API_KEY_HERE'
+existing_providers = existing.get('provider', {})
+backup_providers = backup.get('provider', {})
+preserved, lost = [], []
+for name in backup_providers:
+    if name in existing_providers:
+        old_key = existing_providers[name].get('options', {}).get('apiKey', '')
+        if old_key and old_key != PLACEHOLDER:
+            backup_providers[name].setdefault('options', {})['apiKey'] = old_key
+            preserved.append(name)
+        else:
+            lost.append(name)
+    else:
+        lost.append(name)
 
 with open('$OPENCODE_DIR/opencode.json', 'w') as f:
     json.dump(backup, f, indent=2)
+
+print('PRESERVED=' + ','.join(preserved))
+print('LOST=' + ','.join(lost))
 "
         echo "✅ 智能合并 opencode.json（保留原有 apiKey）"
     else
@@ -60,10 +73,29 @@ for config in "$BACKUP_DIR"/oh-my-openagent*.jsonc; do
     fi
 done
 
+mkdir -p "$OPENCODE_DIR/skills"
+
+# 安装仓库自带技能
+if [ -d "$REPO_SKILLS_DIR" ]; then
+    for skill_dir in "$REPO_SKILLS_DIR"/*; do
+        if [ -d "$skill_dir" ]; then
+            cp -r "$skill_dir" "$OPENCODE_DIR/skills/"
+            echo "✅ 安装技能: $(basename "$skill_dir")"
+        fi
+    done
+fi
+
+# 恢复用户自定义技能（不覆盖 repo 技能）
 if [ -d "$BACKUP_DIR/skills" ]; then
-    mkdir -p "$OPENCODE_DIR/skills"
-    cp -r "$BACKUP_DIR/skills"/* "$OPENCODE_DIR/skills/"
-    echo "✅ 恢复 skills/"
+    for skill_dir in "$BACKUP_DIR/skills"/*; do
+        if [ -d "$skill_dir" ]; then
+            skill_name=$(basename "$skill_dir")
+            if [ ! -d "$OPENCODE_DIR/skills/$skill_name" ]; then
+                cp -r "$skill_dir" "$OPENCODE_DIR/skills/"
+                echo "✅ 恢复用户技能: $skill_name"
+            fi
+        fi
+    done
 fi
 
 if [ -d "$BACKUP_DIR/plugin" ]; then

@@ -43,31 +43,64 @@ mkdir -p "$OPENCODE_DIR"
 # --- 1. opencode.json（智能合并，保留 apiKey）---
 if [ -f "$BACKUP_DIR/opencode.json" ]; then
     if [ "$SMART_MERGE" = true ] && [ -f "$OPENCODE_DIR/opencode.json" ]; then
-        python3 -c "
-import json
+        MERGE_RESULT=$(python3 -c "
+import json, sys
 
 with open('$OPENCODE_DIR/opencode.json', 'r') as f:
     existing = json.load(f)
 with open('$BACKUP_DIR/opencode.json', 'r') as f:
     backup = json.load(f)
 
-# 保留目标机器已有的 apiKey
 existing_providers = existing.get('provider', {})
 backup_providers = backup.get('provider', {})
+
+PLACEHOLDER = 'YOUR_API_KEY_HERE'
+preserved, lost, already_real = [], [], []
+
 for name in backup_providers:
-    if name in existing_providers:
-        old_opts = existing_providers[name].get('options', {})
-        old_key = old_opts.get('apiKey', '')
-        if old_key and old_key != 'YOUR_API_KEY_HERE':
-            backup_providers[name].setdefault('options', {})['apiKey'] = old_key
+    old_key = existing_providers.get(name, {}).get('options', {}).get('apiKey', '')
+    new_key = backup_providers.get(name, {}).get('options', {}).get('apiKey', '')
+    if old_key and old_key != PLACEHOLDER:
+        if new_key == PLACEHOLDER:
+            backup_providers[name]['options']['apiKey'] = old_key
+            preserved.append(name)
+        else:
+            already_real.append(name)
+    else:
+        if new_key != PLACEHOLDER:
+            already_real.append(name)
+        else:
+            lost.append(name)
 
 with open('$OPENCODE_DIR/opencode.json', 'w') as f:
     json.dump(backup, f, indent=2, ensure_ascii=False)
-"
-        echo "✅ 智能合并 opencode.json（已保留原有 apiKey）"
+
+print('PRESERVED=' + ','.join(preserved))
+print('ALREADY_REAL=' + ','.join(already_real))
+print('LOST=' + ','.join(lost))
+")
+        eval "$MERGE_RESULT"
+
+        if [ -n "${PRESERVED:-}" ]; then
+            echo "🔑 已保留 apiKey: $PRESERVED"
+        fi
+        if [ -n "${ALREADY_REAL:-}" ]; then
+            echo "ℹ️  备份中已是真实 key: $ALREADY_REAL"
+        fi
+        if [ -n "${LOST:-}" ]; then
+            echo "⚠️  以下 provider 无 apiKey 可保留: $LOST"
+            echo "    (目标机器和备份都未配置，请手动填入)"
+        fi
+        echo "✅ 智能合并 opencode.json 完成"
+    elif [ -f "$OPENCODE_DIR/opencode.json" ]; then
+        # 有现有配置但没 python3：拒绝覆盖
+        echo "❌ 缺少 python3，无法安全合并。已中止以保护 apiKey。"
+        echo "   安装 python3 后重试，或手动备份现有 opencode.json 后用 --force 覆盖"
+        exit 1
     else
+        # 没有现有配置，正常创建
         cp "$BACKUP_DIR/opencode.json" "$OPENCODE_DIR/"
-        echo "⚠️  已覆盖 opencode.json（请检查 apiKey）"
+        echo "⚠️  已创建 opencode.json，请手动填入 apiKey"
     fi
 fi
 

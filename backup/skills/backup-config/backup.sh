@@ -4,17 +4,17 @@
 
 set -e
 
-CURRENT_DIR="$(pwd)"
-EXPECTED_DIR="/home/hys/projects/opencode-backup"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ "$CURRENT_DIR" != "$EXPECTED_DIR" ]; then
+if [ ! -f "$REPO_ROOT/backup.sh" ]; then
     echo "❌ 错误：必须在 opencode-backup 项目目录下执行"
-    echo "请先运行: cd $EXPECTED_DIR"
+    echo "请先切换到项目根目录"
     exit 1
 fi
 
 OPENCODE_DIR="$HOME/.config/opencode"
-BACKUP_DIR="$CURRENT_DIR/backup"
+BACKUP_DIR="$REPO_ROOT/backup"
 
 echo "🔄 开始备份 OpenCode 配置..."
 

@@ -1,79 +1,50 @@
 #!/bin/bash
+set -euo pipefail
 
-# OpenCode Model Switcher
-# Switch between preconfigured model sets
-
-CONFIG_DIR="/root/.config/opencode"
+CONFIG_DIR="$HOME/.config/opencode"
 TARGET_CONFIG="$CONFIG_DIR/oh-my-openagent.jsonc"
-VOLC_CONFIG="$CONFIG_DIR/oh-my-openagent-volc.jsonc"
-MIMO_CONFIG="$CONFIG_DIR/oh-my-openagent-mimo.jsonc"
-OPENCODE_FREE_CONFIG="$CONFIG_DIR/oh-my-openagent-opencode.jsonc"
-DEEPSEEK_CONFIG="$CONFIG_DIR/oh-my-openagent-deepseek.jsonc"
-OPENCODE_CONFIG="$CONFIG_DIR/opencode.json"
+
+declare -A MODEL_MAP
+shopt -s nullglob
+for config in "$CONFIG_DIR"/oh-my-openagent*.jsonc; do
+    base=$(basename "$config" .jsonc)
+    if [ "$base" = "oh-my-openagent" ]; then
+        continue
+    fi
+    name=${base#oh-my-openagent-}
+    name=${name#oh-my-openagent.}
+    if [ -n "$name" ] && [ "$name" != "$base" ]; then
+        MODEL_MAP["$name"]="$config"
+    fi
+done
+shopt -u nullglob
 
 show_usage() {
-    echo "Usage: /switch-model <volc|mimo|opencode|deepseek>"
+    echo "Usage: /switch-model <name>"
     echo ""
-    echo "  volc:     Switch to Volcano Engine full configuration"
-    echo "  mimo:     Switch to Mimo full configuration"
-    echo "  opencode: Switch to OpenCode official free model"
-    echo "  deepseek: Switch to DeepSeek V4 configuration"
+    echo "Available models:"
+    for name in $(printf '%s\n' "${!MODEL_MAP[@]}" | sort); do
+        echo "  $name"
+    done
     echo ""
     echo "Example: /switch-model volc"
 }
 
-switch_to_volc() {
-    echo "Switching to VOLCANO ENGINE configuration..."
-    cp "$VOLC_CONFIG" "$TARGET_CONFIG"
-    sed -i '3s/"model": ".*"/"model": "volcengine-plan\/ark-code-latest"/' "$OPENCODE_CONFIG"
-    echo "✅ Done! Please restart OpenCode for changes to take effect."
-    echo "   Configuration: $VOLC_CONFIG → $TARGET_CONFIG"
-    echo "   Default model changed to: volcengine-plan/ark-code-latest"
-}
-
-switch_to_mimo() {
-    echo "Switching to MIMO configuration..."
-    cp "$MIMO_CONFIG" "$TARGET_CONFIG"
-    sed -i '3s/"model": ".*"/"model": "mimo\/mimo-v2.5-pro"/' "$OPENCODE_CONFIG"
-    echo "✅ Done! Please restart OpenCode for changes to take effect."
-    echo "   Configuration: $MIMO_CONFIG → $TARGET_CONFIG"
-    echo "   Default model changed to: mimo/mimo-v2.5-pro"
-}
-
-switch_to_opencode() {
-    echo "Switching to OPENCODE OFFICIAL FREE MODEL configuration..."
-    cp "$OPENCODE_FREE_CONFIG" "$TARGET_CONFIG"
-    sed -i '3s/"model": ".*"/"model": "opencode\/gpt-5.1-codex"/' "$OPENCODE_CONFIG"
-    echo "✅ Done! Please restart OpenCode for changes to take effect."
-    echo "   Configuration: $OPENCODE_FREE_CONFIG → $TARGET_CONFIG"
-    echo "   Default model changed to: opencode/gpt-5.1-codex"
-    echo "   Note: OpenCode official free model requires that you have authenticated with OpenCode and have available quota"
-}
-
-switch_to_deepseek() {
-    echo "Switching to DEEPSEEK V4 configuration..."
-    cp "$DEEPSEEK_CONFIG" "$TARGET_CONFIG"
-    sed -i '3s/"model": ".*"/"model": "deepseek\/deepseek-v4-pro"/' "$OPENCODE_CONFIG"
-    echo "✅ Done! Please restart OpenCode for changes to take effect."
-    echo "   Configuration: $DEEPSEEK_CONFIG → $TARGET_CONFIG"
-    echo "   Default model changed to: deepseek/deepseek-v4-pro"
-}
-
-case "$1" in
-    "volc")
-        switch_to_volc
-        ;;
-    "mimo")
-        switch_to_mimo
-        ;;
-    "opencode")
-        switch_to_opencode
-        ;;
-    "deepseek")
-        switch_to_deepseek
+case "${1:-}" in
+    ""|help|-h|--help)
+        show_usage
         ;;
     *)
-        show_usage
-        exit 1
+        if [ -n "${MODEL_MAP[$1]:-}" ]; then
+            cp "${MODEL_MAP[$1]}" "$TARGET_CONFIG"
+            echo "✅ 已切换到 $1 ($(basename "${MODEL_MAP[$1]}"))"
+            echo ""
+            echo "⚠️  请重启 OpenCode 以使配置生效"
+        else
+            echo "❌ 未知模型: $1"
+            echo ""
+            show_usage
+            exit 1
+        fi
         ;;
 esac

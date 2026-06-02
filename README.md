@@ -16,7 +16,7 @@
 ### 备份（在当前电脑执行）
 
 ```bash
-cd /path/to/CSO-FORCS/opencode-backup
+cd /path/to/opencode-backup
 ./backup.sh
 ```
 
@@ -25,7 +25,7 @@ cd /path/to/CSO-FORCS/opencode-backup
 ### 恢复（在新电脑执行）
 
 ```bash
-cd /path/to/CSO-FORCS/opencode-backup
+cd /path/to/opencode-backup
 ./restore.sh
 ```
 
@@ -40,8 +40,8 @@ git push
 ### 从 GitHub 恢复
 
 ```bash
-git clone https://github.com/your-repo/CSO-FORCS.git
-cd CSO-FORCS/opencode-backup
+git clone https://github.com/your-repo/opencode-backup.git
+cd opencode-backup
 ./restore.sh
 ```
 

@@ -12,10 +12,25 @@ echo "🔄 开始备份 OpenCode 配置..."
 # 创建备份目录
 mkdir -p "$BACKUP_DIR"
 
-# 备份主配置
+# 备份主配置（脱敏版 - apiKey 替换为占位符）
 if [ -f "$OPENCODE_DIR/opencode.json" ]; then
-    cp "$OPENCODE_DIR/opencode.json" "$BACKUP_DIR/"
-    echo "✅ 备份 opencode.json"
+    python3 -c "
+import json
+import sys
+
+with open('$OPENCODE_DIR/opencode.json', 'r') as f:
+    config = json.load(f)
+
+# 替换所有 apiKey 为占位符
+if 'provider' in config:
+    for provider_name, provider in config['provider'].items():
+        if 'options' in provider and 'apiKey' in provider['options']:
+            provider['options']['apiKey'] = 'YOUR_API_KEY_HERE'
+
+with open('$BACKUP_DIR/opencode.json', 'w') as f:
+    json.dump(config, f, indent=2)
+"
+    echo "✅ 备份 opencode.json（已脱敏）"
 fi
 
 # 备份模型配置方案

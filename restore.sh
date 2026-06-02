@@ -18,8 +18,31 @@ echo "🔄 开始恢复 OpenCode 配置..."
 mkdir -p "$OPENCODE_DIR"
 
 if [ -f "$BACKUP_DIR/opencode.json" ]; then
-    cp "$BACKUP_DIR/opencode.json" "$OPENCODE_DIR/"
-    echo "✅ 恢复 opencode.json"
+    if [ -f "$OPENCODE_DIR/opencode.json" ]; then
+        python3 -c "
+import json
+
+with open('$OPENCODE_DIR/opencode.json', 'r') as f:
+    existing = json.load(f)
+with open('$BACKUP_DIR/opencode.json', 'r') as f:
+    backup = json.load(f)
+
+# 保留目标机器的 apiKey，更新其他配置
+if 'provider' in backup and 'provider' in existing:
+    for name in backup['provider']:
+        if name in existing:
+            old_key = existing[name].get('options', {}).get('apiKey', '')
+            if old_key and old_key != 'YOUR_API_KEY_HERE':
+                backup[name]['options']['apiKey'] = old_key
+
+with open('$OPENCODE_DIR/opencode.json', 'w') as f:
+    json.dump(backup, f, indent=2)
+"
+        echo "✅ 智能合并 opencode.json（保留原有 apiKey）"
+    else
+        cp "$BACKUP_DIR/opencode.json" "$OPENCODE_DIR/"
+        echo "⚠️  已创建 opencode.json，请手动填入 apiKey"
+    fi
 fi
 
 for config in "$BACKUP_DIR"/oh-my-openagent*.jsonc; do

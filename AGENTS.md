@@ -13,14 +13,16 @@ OpenCode configuration backup/restore utility. Not a code project—shell script
 - Only `backup.sh`, `restore.sh`, `README.md` are version-controlled
 - Plugin symlinks are stored as `.link` files (contain target path)
 - Superpowers skills are only backed up if NOT a git repo (see backup.sh line 58)
+- `opencode.json` 备份时自动脱敏（apiKey 替换为占位符）
+- 恢复时智能合并：保留目标机器的 apiKey，更新其他配置
 
 ## Commands
 
 ```bash
-# Backup current OpenCode config → ./backup/
+# Backup current OpenCode config → ~/.config/opencode/backup/
 ./backup.sh
 
-# Restore from ./backup/ → ~/.config/opencode/
+# Restore from ~/.config/opencode/backup/ → ~/.config/opencode/
 ./restore.sh
 
 # Model switching (via skill)
@@ -28,6 +30,10 @@ OpenCode configuration backup/restore utility. Not a code project—shell script
 /switch-model mimo       # Mimo (mimo-v2.5-pro)
 /switch-model opencode   # OpenCode official free (gpt-5.1-codex)
 /switch-model deepseek   # DeepSeek V4 (deepseek-v4-pro)
+
+# Backup/Restore (via skill - 推荐)
+/backup-config             # 备份配置（自动脱敏 apiKey）
+/restore-config            # 恢复配置（智能合并，保留 apiKey）
 ```
 
 ## Directory Structure
@@ -44,6 +50,8 @@ opencode-backup/
     ├── opencode-model-switch.md         # Model switching guide
     ├── skills/
     │   ├── switch-model/                # Model switching skill
+    │   ├── backup-config/               # Backup skill (/backup-config)
+    │   ├── restore-config/              # Restore skill (/restore-config)
     │   └── superpowers/                 # Superpowers skills (15 total)
     └── plugin/
         └── superpowers.js.link          # Symlink → superpowers plugin

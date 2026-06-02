@@ -2,36 +2,36 @@
 
 ## What This Is
 
-OpenCode configuration backup/restore utility. Not a code project—shell scripts + config snapshots.
+OpenCode configuration backup/restore utility. Shell scripts + version-controlled config snapshots.
 
-**Repository**: `/home/hys/projects/opencode-backup`  
 **Purpose**: Backup and restore `~/.config/opencode` across machines
 
 ## Critical Facts
 
-- `backup/` is **gitignored** — contains sensitive API keys and user config
-- Only `backup.sh`, `restore.sh`, `README.md` are version-controlled
+- `backup/` contains **desensitized** config (apiKey → `YOUR_API_KEY_HERE`)
+- `skills/` contains the 3 project skills (backup-config, restore-config, switch-model) — tracked in git
 - Plugin symlinks are stored as `.link` files (contain target path)
-- Superpowers skills are only backed up if NOT a git repo (see backup.sh line 58)
+- Superpowers skills are only backed up if NOT a git repo (see backup.sh line ~85)
 - `opencode.json` 备份时自动脱敏（apiKey 替换为占位符）
 - 恢复时智能合并：保留目标机器的 apiKey，更新其他配置
+- 恢复前自动备份现有配置到 `backup/before-restore-<timestamp>/`
 
 ## Commands
 
 ```bash
-# Backup current OpenCode config → ~/.config/opencode/backup/
+# Backup current OpenCode config → ./backup/ (auto-desensitize apiKey)
 ./backup.sh
 
-# Restore from ~/.config/opencode/backup/ → ~/.config/opencode/
+# Restore from ./backup/ → ~/.config/opencode/ (smart merge, preserve apiKey)
 ./restore.sh
 
-# Model switching (via skill)
-/switch-model volc       # Volcano Engine (ark-code-latest)
-/switch-model mimo       # Mimo (mimo-v2.5-pro)
-/switch-model opencode   # OpenCode official free (gpt-5.1-codex)
-/switch-model deepseek   # DeepSeek V4 (deepseek-v4-pro)
+# Model switching (via skill — dynamic, auto-discovers available configs)
+/switch-model volc       # Volcano Engine
+/switch-model mimo       # Mimo
+/switch-model opencode   # OpenCode official free
+/switch-model deepseek   # DeepSeek V4
 
-# Backup/Restore (via skill - 推荐)
+# Backup/Restore (via skill)
 /backup-config             # 备份配置（自动脱敏 apiKey）
 /restore-config            # 恢复配置（智能合并，保留 apiKey）
 ```
@@ -40,30 +40,27 @@ OpenCode configuration backup/restore utility. Not a code project—shell script
 
 ```
 opencode-backup/
-├── backup.sh              # Copies ~/.config/opencode → ./backup/
-├── restore.sh             # Copies ./backup/ → ~/.config/opencode/
-├── README.md              # Chinese documentation
-└── backup/                # [GITIGNORED] Config snapshot
-    ├── opencode.json                    # Main config (providers, models, plugins)
-    ├── oh-my-openagent.jsonc            # Active agent config
-    ├── oh-my-openagent-{volc,mimo,opencode,deepseek}.jsonc  # Presets
-    ├── opencode-model-switch.md         # Model switching guide
-    ├── skills/
-    │   ├── switch-model/                # Model switching skill
-    │   ├── backup-config/               # Backup skill (/backup-config)
-    │   ├── restore-config/              # Restore skill (/restore-config)
-    │   └── superpowers/                 # Superpowers skills (15 total)
-    └── plugin/
-        └── superpowers.js.link          # Symlink → superpowers plugin
+├── backup.sh              # Smart backup + desensitize apiKey
+├── restore.sh             # Smart restore + merge + pre-backup safety
+├── skills/                # [TRACKED] Project skills (available on clone)
+│   ├── backup-config/     #   /backup-config command
+│   ├── restore-config/    #   /restore-config command
+│   └── switch-model/      #   /switch-model command
+├── backup/                # Config snapshot (desensitized, in version control)
+│   ├── opencode.json      #   Main config (providers, models, plugins)
+│   ├── oh-my-openagent*.jsonc  # Agent configs
+│   ├── opencode-model-switch.md
+│   ├── skills/            #   User-custom skills (backed up from ~/.config)
+│   └── plugin/            #   Plugin config (.link files for symlinks)
+├── .gitignore
+├── .gitattributes
+├── AGENTS.md
+└── README.md
 ```
 
 ## Model Switching System
 
-Two files must change together:
-1. `oh-my-openagent.jsonc` — agent model assignments (prometheus, oracle, metis, etc.)
-2. `opencode.json` line 3 — default model
-
-**Gotcha**: If you only change `opencode.json`, sub-agents (brainstorming, planning) will fail silently because they still reference the old model.
+The `/switch-model` skill now dynamically discovers available configurations by scanning `~/.config/opencode/` for `oh-my-openagent*.jsonc` files. No hardcoded model list.
 
 ## Config Details
 
@@ -75,11 +72,10 @@ Two files must change together:
 **oh-my-openagent.jsonc**:
 - All agents use same model (mimo/mimo-v2.5-pro by default)
 - Permission mode: `ask` for all operations (question, edit, bash)
-- Categories: visual-engineering, ultrabrain, deep, artistry, quick, unspecified-low/high, writing
 
 ## When Working Here
 
-- Never commit `backup/` contents (API keys exposed)
-- Scripts assume `~/.config/opencode` as target (hardcoded in both .sh files)
+- Scripts use `$HOME/.config/opencode` and `$SCRIPT_DIR` — portable across machines
 - Restore requires restart: `⚠️ 请重启 OpenCode 以使配置生效`
-- Plugin symlinks use absolute paths (will break if home dir differs)
+- Plugin symlinks use absolute paths (may break if home dir differs)
+- Add new `oh-my-openagent-<name>.jsonc` files for new model profiles — switch-model auto-discovers them

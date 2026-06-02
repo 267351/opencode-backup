@@ -190,7 +190,7 @@
               "text"
             ]
           },
-          "name": "Qwen2.5-7B-Instruct-AWQ (\u901a\u7528\u5bf9\u8bdd\u7248 \u00b7 \u663e\u5b58\u4f18\u5316)",
+          "name": "Qwen2.5-7B-Instruct-AWQ (通用对话版 · 显存优化)",
           "options": {
             "stop": [
               "<|im_end|>",
@@ -215,7 +215,7 @@
               "text"
             ]
           },
-          "name": "Qwen3-8B-AWQ (\u6700\u65b08B \u00b7 \u5de5\u5177\u8c03\u7528)",
+          "name": "Qwen3-8B-AWQ (最新8B · 工具调用)",
           "options": {
             "stop": [
               "<|im_end|>",

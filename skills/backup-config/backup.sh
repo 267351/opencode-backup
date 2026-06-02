@@ -1,63 +1,55 @@
 #!/bin/bash
-# OpenCode 配置备份脚本
-# 用法: ./backup.sh
-# 自动脱敏 apiKey，避免泄露
+# OpenCode 配置备份 Skill
+# 用法: /backup-config
 
-set -euo pipefail
+set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+if [ ! -f "$REPO_ROOT/backup.sh" ]; then
+    echo "❌ 错误：必须在 opencode-backup 项目目录下执行"
+    echo "请先切换到项目根目录"
+    exit 1
+fi
+
 OPENCODE_DIR="$HOME/.config/opencode"
-BACKUP_DIR="$SCRIPT_DIR/backup"
+BACKUP_DIR="$REPO_ROOT/backup"
 
 echo "🔄 开始备份 OpenCode 配置..."
 
-# 创建备份目录
 mkdir -p "$BACKUP_DIR"
 
-# 备份主配置（自动脱敏 apiKey）
 if [ -f "$OPENCODE_DIR/opencode.json" ]; then
-    if command -v python3 &>/dev/null; then
-        python3 -c "
+    python3 -c "
 import json
-import sys
 
 with open('$OPENCODE_DIR/opencode.json', 'r') as f:
     config = json.load(f)
 
-providers = config.get('provider', {})
-for name in providers:
-    opts = providers[name].get('options', {})
-    if 'apiKey' in opts:
-        opts['apiKey'] = 'YOUR_API_KEY_HERE'
+if 'provider' in config:
+    for provider_name, provider in config['provider'].items():
+        if 'options' in provider and 'apiKey' in provider['options']:
+            provider['options']['apiKey'] = 'YOUR_API_KEY_HERE'
 
 with open('$BACKUP_DIR/opencode.json', 'w') as f:
-    json.dump(config, f, indent=2, ensure_ascii=False)
+    json.dump(config, f, indent=2)
 "
-        echo "✅ 备份 opencode.json（已脱敏 apiKey）"
-    else
-        echo "⚠️  python3 未安装，直接复制（apiKey 未脱敏，请手动处理）"
-        cp "$OPENCODE_DIR/opencode.json" "$BACKUP_DIR/"
-    fi
+    echo "✅ 备份 opencode.json（已脱敏）"
 fi
 
-# 备份模型配置方案
-shopt -s nullglob
-configs=("$OPENCODE_DIR"/oh-my-openagent*.jsonc)
-if [ ${#configs[@]} -gt 0 ]; then
-    for config in "${configs[@]}"; do
+for config in "$OPENCODE_DIR"/oh-my-openagent*.jsonc; do
+    if [ -f "$config" ]; then
         cp "$config" "$BACKUP_DIR/"
         echo "✅ 备份 $(basename "$config")"
-    done
-fi
-shopt -u nullglob
+    fi
+done
 
-# 备份自定义 Skills
 if [ -d "$OPENCODE_DIR/skills" ]; then
     cp -r "$OPENCODE_DIR/skills" "$BACKUP_DIR/"
     echo "✅ 备份 skills/"
 fi
 
-# 备份插件配置（符号链接转为.link文件）
 if [ -d "$OPENCODE_DIR/plugin" ]; then
     mkdir -p "$BACKUP_DIR/plugin"
     for plugin in "$OPENCODE_DIR/plugin"/*; do
@@ -72,13 +64,11 @@ if [ -d "$OPENCODE_DIR/plugin" ]; then
     done
 fi
 
-# 备份模型切换说明
 if [ -f "$OPENCODE_DIR/opencode-model-switch.md" ]; then
     cp "$OPENCODE_DIR/opencode-model-switch.md" "$BACKUP_DIR/"
     echo "✅ 备份 opencode-model-switch.md"
 fi
 
-# 备份 Superpowers skills（非 git 仓库时才备份，避免重复）
 if [ -d "$OPENCODE_DIR/superpowers" ] && [ ! -d "$OPENCODE_DIR/superpowers/.git" ]; then
     cp -r "$OPENCODE_DIR/superpowers" "$BACKUP_DIR/"
     echo "✅ 备份 superpowers/"
